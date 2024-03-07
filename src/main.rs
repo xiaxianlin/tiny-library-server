@@ -5,7 +5,7 @@ mod models;
 mod services;
 mod utils;
 
-use actix_session::{storage::RedisActorSessionStore, SessionMiddleware};
+use actix_session::{storage::RedisSessionStore, SessionMiddleware};
 use actix_web::{cookie, middleware, web, App, HttpServer, Scope};
 use handlers::{auth, book};
 use models::AppState;
@@ -42,18 +42,15 @@ async fn main() -> std::io::Result<()> {
 
     let state = AppState { conn };
 
-    let private_key = cookie::Key::generate();
+    let secret_key = cookie::Key::derive_from("scg4WX1d2YMpzFqO0y8oAr72NNl6AIn5".as_bytes());
+    let store = RedisSessionStore::new("redis://127.0.0.1:6379")
+        .await
+        .unwrap();
 
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(state.clone()))
-            .wrap(
-                SessionMiddleware::builder(
-                    RedisActorSessionStore::new("127.0.0.1:6379"),
-                    private_key.clone(),
-                )
-                .build(),
-            )
+            .wrap(SessionMiddleware::builder(store.clone(), secret_key.clone()).build())
             .wrap(middleware::Logger::default())
             .service(
                 web::scope("/api")
