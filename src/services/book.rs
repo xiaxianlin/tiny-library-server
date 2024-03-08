@@ -82,6 +82,29 @@ pub async fn search(db: &DatabaseConnection, params: SearchParams) -> Vec<BookMo
     }
 }
 
+pub async fn count(db: &DatabaseConnection, params: SearchParams) -> u64 {
+    println!("[search] isbn: {:?}", params);
+    let data = BookEntity::find()
+        .apply_if(params.keyword, |query, keyword| {
+            query.filter(
+                Condition::any()
+                    .add(book::Column::Title.contains(&keyword))
+                    .add(book::Column::Author.contains(&keyword))
+                    .add(book::Column::Publisher.contains(&keyword)),
+            )
+        })
+        .count(db)
+        .await;
+
+    match data {
+        Ok(total) => total,
+        Err(e) => {
+            println!("{}", e.to_string());
+            0
+        }
+    }
+}
+
 pub async fn create(db: &DatabaseConnection, data: BookModel) -> i64 {
     let isbn = data.isbn.unwrap();
     let exist_book = find_by_isbn(db, String::from(&isbn)).await;

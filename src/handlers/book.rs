@@ -10,7 +10,7 @@ use actix_web::{
     web::{Bytes, Data, Json, Path, Query},
     HttpResponse,
 };
-use serde_json::Value;
+use serde_json::{json, Value};
 
 use super::LoginAuth;
 
@@ -38,8 +38,10 @@ pub async fn search(
     state: Data<AppState>,
     params: Query<SearchParams>,
 ) -> HttpResponse {
-    let data = book::search(&state.conn, params.into_inner()).await;
-    success(0, "", Some(data))
+    let params = params.into_inner();
+    let data = book::search(&state.conn, params.clone()).await;
+    let count = book::count(&state.conn, params).await;
+    success(0, "", Some(json!({"list":data, "total":count})))
 }
 
 #[post("/")]
