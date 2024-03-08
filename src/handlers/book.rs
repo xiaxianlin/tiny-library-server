@@ -15,8 +15,17 @@ use serde_json::{json, Value};
 use super::LoginAuth;
 
 #[get("/douban/{isbn}")]
-pub async fn find_by_douban(_: LoginAuth, info: Path<String>) -> HttpResponse {
-    let data = douban::get_book_by_douban(info.into_inner()).await;
+pub async fn find_by_douban(
+    _: LoginAuth,
+    state: Data<AppState>,
+    info: Path<String>,
+) -> HttpResponse {
+    let info = info.into_inner();
+    let data = book::find_by_isbn(&state.conn, info.clone()).await;
+    if data.is_none() {
+        let data = douban::get_book_by_douban(info).await;
+        return success(0, "", data);
+    }
     success(0, "", data)
 }
 
@@ -44,7 +53,7 @@ pub async fn search(
     success(0, "", Some(json!({"list":data, "total":count})))
 }
 
-#[post("/")]
+#[post("/add")]
 pub async fn create(_: LoginAuth, state: Data<AppState>, info: Json<BookModel>) -> HttpResponse {
     let id = book::create(&state.conn, info.into_inner()).await;
     success(0, "", Some(id))
