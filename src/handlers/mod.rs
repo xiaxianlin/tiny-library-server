@@ -24,7 +24,6 @@ impl FromRequest for LoginAuth {
                 return ready(Ok(LoginAuth {}));
             }
         }
-
         ready(Err(ServiceError::Unauthorized.into()))
     }
 }
