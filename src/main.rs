@@ -58,7 +58,7 @@ async fn main() -> std::io::Result<()> {
                     .service(book_routes()),
             )
     })
-    .bind(("127.0.0.1", 7707))?
+    .bind(("0.0.0.0", 7707))?
     .run()
     .await
 }
