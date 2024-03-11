@@ -16,11 +16,12 @@
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+SET SQL_SAFE_UPDATES = 0;
 
 -- ----------------------------
 -- Table structure for book
 -- ----------------------------
-DROP TABLE IF EXISTS `book`;
+-- DROP TABLE IF EXISTS `book`;
 CREATE TABLE `book` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `title` varchar(200) DEFAULT '',
@@ -959,3 +960,4 @@ INSERT INTO `book` (`id`, `title`, `author`, `image`, `isbn`, `pubdate`, `publis
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
+SET SQL_SAFE_UPDATES = 1;
